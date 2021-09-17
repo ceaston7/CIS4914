@@ -1,0 +1,16 @@
+{
+  "source": "Unity",
+  "applications": [
+    {
+      "app_key": "application.generated.unity.cis4914enhancedusertracking.exe",
+      "launch_type": "url",
+      "url": "steam://launch/",
+      "action_manifest_path": "C:\\Users\\Christopher\\Documents\\CIS4914\\CIS4914-EnhancedUserTracking\\actions.json",
+      "strings": {
+        "en_us": {
+          "name": "CIS4914-EnhancedUserTracking [Testing]"
+        }
+      }
+    }
+  ]
+}
