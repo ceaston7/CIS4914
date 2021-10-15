@@ -54,7 +54,7 @@ public class PlayerControl : MonoBehaviour
     private void walk()
     {
         Debug.Log("In walk");
-        var camera2dForward = new Vector3(camera.forward.x, 0.0f, camera.position.z);
+        var camera2dForward = new Vector3(camera.forward.x, 0.0f, camera.forward.z);
         camera2dForward.Normalize();
         Debug.Log("camera forward: " + camera2dForward.ToString("F3"));
         //TODO: See if a minimum movement is required to keep from slowly walking while standing still
