@@ -32,7 +32,6 @@ public class VRPointer : MonoBehaviour
     private Vector3 FindEnd(){
         PointerEventData eventData = new PointerEventData(eventSystem);
         eventData.position = inputModule.inputOverride.mousePosition;
-        Debug.Log("eventdata position: " + eventData.position);
 
         if(eventData.pointerEnter){
             Debug.Log(eventData.pointerEnter.name);
@@ -48,11 +47,9 @@ public class VRPointer : MonoBehaviour
         float distance = Mathf.Clamp(canvasRaycast.distance, 0.0f, defaultLength);
 
         if(distance != 0.0f){
-            Debug.Log("returned canvas distance");
             return CalculateEnd(distance);
         }
         else{
-            Debug.Log("returned default distance");
             return CalculateEnd(defaultLength);
         }
     }
@@ -63,7 +60,6 @@ public class VRPointer : MonoBehaviour
             if(!result.gameObject)
                 continue;
 
-            Debug.Log("Found canvas");
             return result;
         }
 
