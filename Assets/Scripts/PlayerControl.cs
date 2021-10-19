@@ -10,16 +10,17 @@ public class PlayerControl : MonoBehaviour
     public Transform rightFoot;
     public Transform camera;
     Rigidbody rigidbody;
-    bool walkButtonIsDown;
+    bool walkButtonIsDown = false;
+    bool menuIsOpen = false;
     Vector3 lastLeftFootPos = new Vector3();
     Vector3 lastRightFootPos = new Vector3();
     public SteamVR_Action_Boolean walkButton;
+    public SteamVR_Action_Boolean menuButton;
     public SteamVR_Input_Sources controller;
 
     void Start()
     {
         MyUserSettings.MyUserSettings.LocomotionMode = Locomotion.walk;
-        walkButtonIsDown = false;
         rigidbody = GetComponent<Rigidbody>();
         switch (MyUserSettings.MyUserSettings.LocomotionMode)
         {
@@ -30,19 +31,25 @@ public class PlayerControl : MonoBehaviour
             case Locomotion.walk:
                 Debug.Log("setting action");
                 //walking button
-                walkButton.AddOnChangeListener(walkButtonChange, controller);
+                walkButton.AddOnChangeListener(WalkButtonChange, controller);
                 break;
         }
+
+        menuButton.AddOnStateDownListener(OpenMenu, controller);
     }
 
     void Update()
     {
-        if (walkButtonIsDown){
-            walk();
+        if (!menuIsOpen)
+        {
+            if (walkButtonIsDown)
+            {
+                walk();
+            }
+            //update last foot positions after walk
+            lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
+            lastRightFootPos.Set(rightFoot.position.x, rightFoot.position.y, rightFoot.position.z);
         }
-        //update last foot positions after walk
-        lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
-        lastRightFootPos.Set(rightFoot.position.x, rightFoot.position.y, rightFoot.position.z);
     }
 
     private void FixedUpdate()
@@ -62,8 +69,13 @@ public class PlayerControl : MonoBehaviour
         transform.position += camera2dForward * (Mathf.Abs(leftFoot.position.y - lastLeftFootPos.y) + Mathf.Abs(rightFoot.position.y - lastRightFootPos.y));
     }
 
-    void walkButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
+    void WalkButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
         walkButtonIsDown = newState;
         Debug.Log("walkButton: " + walkButtonIsDown);
+    }
+
+    void OpenMenu(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+    {
+        menuIsOpen = true;
     }
 }
