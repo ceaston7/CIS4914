@@ -6,12 +6,16 @@ using MyUserSettings;
 
 public class PlayerControl : MonoBehaviour
 {
+    public Transform camera;
+    Rigidbody rigid;
+    
+    bool menuIsOpen = false;
+    [SerializeField]
+    Canvas pauseMenu;
+
     public Transform leftFoot;
     public Transform rightFoot;
-    public Transform camera;
-    Rigidbody rigidbody;
     bool walkButtonIsDown = false;
-    bool menuIsOpen = false;
     Vector3 lastLeftFootPos = new Vector3();
     Vector3 lastRightFootPos = new Vector3();
     public SteamVR_Action_Boolean walkButton;
@@ -21,7 +25,7 @@ public class PlayerControl : MonoBehaviour
     void Start()
     {
         MyUserSettings.MyUserSettings.LocomotionMode = Locomotion.walk;
-        rigidbody = GetComponent<Rigidbody>();
+        rigid = GetComponent<Rigidbody>();
         switch (MyUserSettings.MyUserSettings.LocomotionMode)
         {
             case Locomotion.blink:
@@ -45,10 +49,10 @@ public class PlayerControl : MonoBehaviour
             if (walkButtonIsDown)
             {
                 walk();
+                //update last foot positions after walk
+                lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
+                lastRightFootPos.Set(rightFoot.position.x, rightFoot.position.y, rightFoot.position.z);
             }
-            //update last foot positions after walk
-            lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
-            lastRightFootPos.Set(rightFoot.position.x, rightFoot.position.y, rightFoot.position.z);
         }
     }
 
@@ -77,5 +81,9 @@ public class PlayerControl : MonoBehaviour
     void OpenMenu(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
     {
         menuIsOpen = true;
+        Time.timeScale = 0;
+        pauseMenu.transform.position = camera.transform.position + camera.transform.forward * 3.0f;
+        pauseMenu.transform.forward = camera.transform.forward;
+        pauseMenu.GetComponent<MenuManager>().OpenMenu();
     }
 }

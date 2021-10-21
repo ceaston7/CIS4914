@@ -6,23 +6,38 @@ public class MenuManager : MonoBehaviour
 {
     public Stack<Canvas> menuHistory;
     public Canvas currentMenu;
-    // Start is called before the first frame update
+    public Canvas startMenu;
+    
     void Awake()
     {
         menuHistory = new Stack<Canvas>();
-        currentMenu = GetComponent<Canvas>();
     }
 
-    public void changeMenu(Canvas nextMenu){
+    public void ChangeMenu(Canvas nextMenu){
         menuHistory.Push(currentMenu);
-        currentMenu.enabled = false;
+        currentMenu.GetComponent<MenuUtil>().CloseMenu();
         currentMenu = nextMenu;
+        currentMenu.GetComponent<MenuUtil>().OpenMenu();
     }
 
-    public void goBack()
+    public void GoBack()
     {
-        currentMenu.enabled = false;
+        currentMenu.GetComponent<MenuUtil>().CloseMenu();
         currentMenu = menuHistory.Pop();
-        currentMenu.enabled = true;
+        currentMenu.GetComponent<MenuUtil>().OpenMenu();
+    }
+
+    public void CloseMenu(){
+        Debug.Log("Closing menu");
+        menuHistory.Clear();
+        gameObject.SetActive(false);
+        currentMenu.GetComponent<MenuUtil>().CloseMenu();
+        Time.timeScale = 1.0f;
+    }
+
+    public void OpenMenu(){
+        gameObject.GetComponent<MenuUtil>().OpenMenu();
+        currentMenu = startMenu;
+        menuHistory.Push(startMenu);
     }
 }
