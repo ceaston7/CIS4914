@@ -7,6 +7,7 @@ public class MenuManager : MonoBehaviour
     public Stack<Canvas> menuHistory;
     public Canvas currentMenu;
     public Canvas startMenu;
+    public GameObject player;
     
     void Awake()
     {
@@ -28,11 +29,11 @@ public class MenuManager : MonoBehaviour
     }
 
     public void CloseMenu(){
-        Debug.Log("Closing menu");
         menuHistory.Clear();
         gameObject.SetActive(false);
         currentMenu.GetComponent<MenuUtil>().CloseMenu();
         Time.timeScale = 1.0f;
+        player.GetComponent<PlayerControl>().menuIsOpen = false;
     }
 
     public void OpenMenu(){

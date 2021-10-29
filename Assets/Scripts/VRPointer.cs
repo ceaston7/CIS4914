@@ -32,17 +32,9 @@ public class VRPointer : MonoBehaviour
     private Vector3 FindEnd(){
         PointerEventData eventData = new PointerEventData(eventSystem);
         eventData.position = inputModule.inputOverride.mousePosition;
-
-        if(eventData.pointerEnter){
-            Debug.Log(eventData.pointerEnter.name);
-        
-        }
         
         results.Clear();
         eventSystem.RaycastAll(eventData, results);
-        foreach(RaycastResult result in results){
-            Debug.Log(result.distance);
-        }
         canvasRaycast = FindCanvasRaycast();
         float distance = Mathf.Clamp(canvasRaycast.distance, 0.0f, defaultLength);
 

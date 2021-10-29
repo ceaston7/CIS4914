@@ -18,6 +18,11 @@ public class Calibration : MonoBehaviour
             hmd = GameObject.Find("[CameraRig]").transform;
     }
 
+    private void Start()
+    {
+        baseHeight = transform.position.y;
+    }
+
     public void Calibrate(){
         CalibrateHeight();
         CalibrateOrientation();
@@ -39,7 +44,6 @@ public class Calibration : MonoBehaviour
     public IEnumerator RecordHeight() {
         for (float timer = 0.0f; timer < calibrateTime; timer += 0.03f)
         { 
-            Debug.Log("recording height");
             //Difference between tracker and floor height
             heightMeasurements.Add(transform.position.y - transform.root.transform.position.y);
 
