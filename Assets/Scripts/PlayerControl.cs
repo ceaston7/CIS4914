@@ -8,23 +8,27 @@ public class PlayerControl : MonoBehaviour
 {
     public Transform camera;
     Rigidbody rigid;
-    
+
     public bool menuIsOpen = false;
     [SerializeField]
     Canvas pauseMenu;
 
     public Transform leftFoot;
     public Calibration leftFootCalibrationData;
+    public GroundChecker leftFootGroundChecker;
     public Transform rightFoot;
     public Calibration rightFootCalibrationData;
+    public GroundChecker rightFootGroundChecker;
 
     bool walkButtonIsDown = false;
     bool isGrounded = true;
     bool isFootOnGround = true;
     public bool useGravity = false;
-    float spherecastRadius = 0.05f;
-    Vector3 spherecastRadiusVector;
-    float raycastDist = 0.02f;
+    [SerializeField]
+    float raycastDist;
+    List<bool> gravityBuffer;
+    [SerializeField]
+    int bufferSize;
 
     Vector3 lastLeftFootPos = new Vector3();
     Vector3 lastRightFootPos = new Vector3();
@@ -50,9 +54,14 @@ public class PlayerControl : MonoBehaviour
 
         menuButton.AddOnStateDownListener(OpenMenu, controller);
         leftFootCalibrationData = leftFoot.GetComponent<Calibration>();
+        leftFootGroundChecker = rightFoot.GetComponent<GroundChecker>();
         rightFootCalibrationData = rightFoot.GetComponent<Calibration>();
-        spherecastRadius = leftFoot.GetChild(0).localScale.x / 2.0f;
-        spherecastRadiusVector = new Vector3(0, 0, spherecastRadius);
+        rightFootGroundChecker = rightFoot.GetComponent<GroundChecker>();
+        gravityBuffer = new List<bool>();
+        for (int i = 0; i < bufferSize; i++)
+        {
+            gravityBuffer.Add(true);
+        }
     }
 
     void Update()
@@ -66,28 +75,21 @@ public class PlayerControl : MonoBehaviour
                 lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
                 lastRightFootPos.Set(rightFoot.position.x, rightFoot.position.y, rightFoot.position.z);
             }
-
-            isGrounded = GroundedCheck();
-            isFootOnGround = FootOnGroundCheck();
-
-            if (useGravity)
-            {
-                isGrounded = GroundedCheck();
-                isFootOnGround = FootOnGroundCheck();
-                if (isFootOnGround)
-                {
-                    if (!isGrounded)
-                    {
-                        rigid.useGravity = true;
-                    }
-                    else
-                    {
-                        rigid.useGravity = false;
-                    }
+            
+            if(useGravity){
+                Debug.Log("buffer length: " + gravityBuffer.Count);
+                gravityBuffer.RemoveAt(gravityBuffer.Count - 1);
+                Debug.Log("Adding: " + !(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded));
+                gravityBuffer.Insert(0, !(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded));
+                Debug.Log("buffer: ");
+                foreach(bool b in gravityBuffer){
+                    Debug.Log(b);
                 }
-                else
-                {
-                    rigid.useGravity = false;
+                bool a = gravityBuffer.TrueForAll(x => { return x; });
+                Debug.Log("use gravity: " + a);
+                rigid.useGravity = a;
+                if(!rigid.useGravity){
+                    rigid.velocity = Vector3.zero;
                 }
             }
         }
@@ -118,57 +120,5 @@ public class PlayerControl : MonoBehaviour
         pauseMenu.transform.position = camera.transform.position + camera.transform.forward * 3.0f;
         pauseMenu.transform.forward = camera.transform.forward;
         pauseMenu.GetComponent<MenuManager>().OpenMenu();
-    }
-
-    //Check to see if both feet are physically off the ground, meaning the user is jumping in real-space
-    //Return true if at least one foot is on the ground
-    bool FootOnGroundCheck(){
-        bool right = rightFootCalibrationData.baseHeight - rightFoot.transform.position.y > 0.1;
-        bool left = leftFootCalibrationData.baseHeight - leftFoot.transform.position.y > 0.1;
-        Debug.Log("right ground: " + right);
-        Debug.Log("left ground: " + left);
-        if (rightFootCalibrationData.baseHeight - rightFoot.transform.position.y > 0.1
-            && leftFootCalibrationData.baseHeight - leftFoot.transform.position.y > 0.1)
-            return false;
-        else
-            return true;
-    }
-
-    //Check if the user's feet are on a surface in VR space
-    //Return true if at least one foot is on the ground
-    bool GroundedCheck(){
-        RaycastHit rightRaycastHit, leftRaycastHit;
-
-        Ray rightRay = new Ray(rightFoot.transform.position, Vector3.down);
-        Ray leftRay = new Ray(rightFoot.transform.position, Vector3.down);
-
-        bool rightHit = Physics.Raycast(rightRay, out rightRaycastHit, 0.01f);
-        bool leftHit = Physics.Raycast(leftRay, out leftRaycastHit, 0.01f);
-
-        bool rightSphereHit1 = Physics.SphereCast(rightFoot.transform.position + rightFoot.transform.TransformPoint(spherecastRadiusVector), spherecastRadius, Vector3.down, out rightRaycastHit, raycastDist);
-        Debug.Log("right1: " + rightSphereHit1);
-        if(rightSphereHit1){
-            Debug.Log("Hit " + rightRaycastHit.transform.gameObject.name);
-        }
-        bool rightSphereHit2 = Physics.SphereCast(rightFoot.transform.position - rightFoot.transform.TransformPoint(spherecastRadiusVector), spherecastRadius, Vector3.down, out rightRaycastHit, raycastDist);
-        Debug.Log("right2: " + rightSphereHit2);
-        if (rightSphereHit2)
-        {
-            Debug.Log("Hit " + rightRaycastHit.transform.gameObject.name);
-        }
-        bool leftSphereHit1 = Physics.SphereCast(leftFoot.transform.position + leftFoot.transform.TransformPoint(spherecastRadiusVector), spherecastRadius, Vector3.down, out leftRaycastHit, raycastDist);
-        Debug.Log("left1: " + leftSphereHit1);
-        if (leftSphereHit1)
-        {
-            Debug.Log("Hit " + leftRaycastHit.transform.gameObject.name);
-        }
-        bool leftSphereHit2 = Physics.SphereCast(leftFoot.transform.position - leftFoot.transform.TransformPoint(spherecastRadiusVector), spherecastRadius, Vector3.down, out leftRaycastHit, raycastDist);
-        Debug.Log("left2: " + leftSphereHit2);
-        if (leftSphereHit2)
-        {
-            Debug.Log("Hit " + leftRaycastHit.transform.gameObject.name);
-        }
-
-        return rightSphereHit1 || rightSphereHit2 || leftSphereHit1 || leftSphereHit2;
     }
 }
