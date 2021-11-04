@@ -4,10 +4,16 @@ using UnityEngine;
 
 public class GroundChecker : MonoBehaviour
 {
+    //Publicly accesible state of groundedness of VR user
     public bool grounded = false;
 
+    //Grounded state based off of collision
     bool colliding = false;
+
+    //Grounded state based off of meatspace position
     bool footOnGround = false;
+
+    //Grounded state based off of spherecast from VR feet
     bool spherecastGround = false;
 
     float spherecastRadius;
@@ -19,6 +25,8 @@ public class GroundChecker : MonoBehaviour
     bool sphereHit2;
     [SerializeField]
     float raycastDist;
+    [SerializeField]
+    LayerMask mask;
 
     private void Start()
     {
@@ -36,21 +44,34 @@ public class GroundChecker : MonoBehaviour
         grounded = !(footOnGround && !spherecastGround && !colliding);
     }
 
+    /*private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("trigger enter");
+        colliding = !other.gameObject.CompareTag("NoStand");
+        Debug.Log("colliding: " + colliding);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (!other.gameObject.CompareTag("NoStand"))
+            colliding = false;
+    }*/
+
     private void OnCollisionStay(Collision collision)
     {
-        colliding = true;
+        colliding = !collision.gameObject.CompareTag("Player");
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        colliding = false;
+        if(!collision.gameObject.CompareTag("Player"))
+            colliding = false;
     }
 
-    //Check to see if foot is physically on the ground
+    //Check to see if foot is physically on the ground in meatspace
     bool FootOnGroundCheck()
     {
         bool a = Mathf.Abs(calibrationData.baseHeight - transform.root.InverseTransformPoint(transform.position).y) < 0.1f;
-        //Debug.Log(gameObject.name + " on ground: " + a);
         footOnGround = a;
         return a;
     }

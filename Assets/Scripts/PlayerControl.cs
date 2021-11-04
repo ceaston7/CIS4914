@@ -20,6 +20,11 @@ public class PlayerControl : MonoBehaviour
     public Calibration rightFootCalibrationData;
     public GroundChecker rightFootGroundChecker;
 
+    [SerializeField]
+    GameObject leftHand;
+    [SerializeField]
+    GameObject rightHand;
+
     bool walkButtonIsDown = false;
     bool isGrounded = true;
     bool isFootOnGround = true;
@@ -30,10 +35,15 @@ public class PlayerControl : MonoBehaviour
     [SerializeField]
     int bufferSize;
 
+    bool spawnButtonIsDown = false;
+    bool spawnButtonChanged = false;
+    SteamVR_Input_Sources spawnSource;
+
     Vector3 lastLeftFootPos = new Vector3();
     Vector3 lastRightFootPos = new Vector3();
     public SteamVR_Action_Boolean walkButton;
     public SteamVR_Action_Boolean menuButton;
+    public SteamVR_Action_Boolean spawnButton;
     public SteamVR_Input_Sources controller;
 
     void Start()
@@ -77,20 +87,28 @@ public class PlayerControl : MonoBehaviour
             }
             
             if(useGravity){
-                Debug.Log("buffer length: " + gravityBuffer.Count);
                 gravityBuffer.RemoveAt(gravityBuffer.Count - 1);
-                Debug.Log("Adding: " + !(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded));
                 gravityBuffer.Insert(0, !(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded));
-                Debug.Log("buffer: ");
-                foreach(bool b in gravityBuffer){
-                    Debug.Log(b);
-                }
-                bool a = gravityBuffer.TrueForAll(x => { return x; });
-                Debug.Log("use gravity: " + a);
-                rigid.useGravity = a;
-                if(!rigid.useGravity){
+                rigid.useGravity = gravityBuffer.TrueForAll(x => { return x; });
+                if (!rigid.useGravity){
                     rigid.velocity = Vector3.zero;
                 }
+            }
+
+            if(spawnButtonIsDown && spawnButtonChanged){
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                
+                cube.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+                if(spawnSource == SteamVR_Input_Sources.LeftHand){
+                    cube.transform.position = leftHand.transform.position;
+                }
+                else if(spawnSource == SteamVR_Input_Sources.RightHand){
+                    cube.transform.position = rightHand.transform.position;
+                }
+                
+                cube.AddComponent<Rigidbody>();
+                
+                spawnButtonChanged = false;
             }
         }
     }
@@ -111,6 +129,12 @@ public class PlayerControl : MonoBehaviour
 
     void WalkButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
         walkButtonIsDown = newState;
+    }
+
+    void SpawnButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
+        spawnButtonIsDown = newState;
+        spawnButtonChanged = true;
+        spawnSource = fromSource;
     }
 
     void OpenMenu(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
