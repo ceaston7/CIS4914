@@ -85,17 +85,9 @@ public class PlayerControl : MonoBehaviour
                 lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
                 lastRightFootPos.Set(rightFoot.position.x, rightFoot.position.y, rightFoot.position.z);
             }
-            
-            if(useGravity){
-                gravityBuffer.RemoveAt(gravityBuffer.Count - 1);
-                gravityBuffer.Insert(0, !(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded));
-                rigid.useGravity = gravityBuffer.TrueForAll(x => { return x; });
-                if (!rigid.useGravity){
-                    rigid.velocity = Vector3.zero;
-                }
-            }
 
             if(spawnButtonIsDown && spawnButtonChanged){
+                Debug.Log("Spawn cube");
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 
                 cube.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
@@ -115,7 +107,28 @@ public class PlayerControl : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (useGravity)
+        {
+            gravityBuffer.RemoveAt(gravityBuffer.Count - 1);
+            if (!(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded))
+                Debug.LogWarning("right: " + rightFootGroundChecker.grounded + "\nleft: " + leftFootGroundChecker.grounded);
 
+            gravityBuffer.Insert(0, !(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded));
+            int i = 0;
+            foreach (bool b in gravityBuffer)
+            {
+                Debug.Log("buffer val " + i++ + ": " + b);
+            }
+            bool a = gravityBuffer.TrueForAll(x => { return x; });
+            Debug.Log("gravity should be: " + a);
+            rigid.useGravity = a;
+            if (!rigid.useGravity)
+            {
+                rigid.velocity = Vector3.zero;
+            }
+        }
+
+        rightFootGroundChecker.colliding = leftFootGroundChecker.colliding = false;
     }
 
     //TODO: Walking backward?
@@ -132,6 +145,7 @@ public class PlayerControl : MonoBehaviour
     }
 
     void SpawnButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
+        Debug.Log("spawn button change");
         spawnButtonIsDown = newState;
         spawnButtonChanged = true;
         spawnSource = fromSource;

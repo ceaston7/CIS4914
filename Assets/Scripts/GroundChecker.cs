@@ -8,13 +8,13 @@ public class GroundChecker : MonoBehaviour
     public bool grounded = false;
 
     //Grounded state based off of collision
-    bool colliding = false;
+    public bool colliding = false;
 
     //Grounded state based off of meatspace position
-    bool footOnGround = false;
+    public bool footOnGround = false;
 
     //Grounded state based off of spherecast from VR feet
-    bool spherecastGround = false;
+    public bool spherecastGround = false;
 
     float spherecastRadius;
     Vector3 spherecastRadiusVector;
@@ -60,12 +60,6 @@ public class GroundChecker : MonoBehaviour
     private void OnCollisionStay(Collision collision)
     {
         colliding = !collision.gameObject.CompareTag("Player");
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if(!collision.gameObject.CompareTag("Player"))
-            colliding = false;
     }
 
     //Check to see if foot is physically on the ground in meatspace

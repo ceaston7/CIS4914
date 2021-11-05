@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class Tripwire : MonoBehaviour
 {
-    public CapsuleCollider collider;
-
+    [SerializeField]
+    AudioSource source;
     void OnCollisionEnter(Collision collision){
         if(collision.gameObject.CompareTag("Player")){
-            GetComponent<AudioSource>().Play();
+            source.Play();
         }
     }
 }

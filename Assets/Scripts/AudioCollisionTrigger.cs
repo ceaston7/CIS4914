@@ -6,20 +6,32 @@ public class AudioCollisionTrigger : MonoBehaviour
 {
     public bool soundOverlap;
     public bool soundCutoff;
-    private void OnCollisionEnter(Collision collision)
+    public AudioSource source;
+
+    private void Awake()
     {
-        var source = transform.root.GetComponent<AudioSource>();
-        if (collision.collider.transform.CompareTag("Player")) {
+        if(source == null)
+        {
+            source = transform.GetComponent<AudioSource>();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.transform.CompareTag("Player"))
+        {
+            Debug.Log("player step");
             if (!soundOverlap && !soundCutoff && !source.isPlaying)
             {
                 source.Play();
             }
-            else if(soundCutoff)
+            else if (soundCutoff)
             {
                 source.Stop();
                 source.Play();
             }
-            else if(soundOverlap){
+            else if (soundOverlap)
+            {
                 source.Play();
             }
         }

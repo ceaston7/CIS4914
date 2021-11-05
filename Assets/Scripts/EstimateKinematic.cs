@@ -19,7 +19,7 @@ public class EstimateKinematic : MonoBehaviour
     Vector3 lastRotVelocity;
     Vector3 lastRotAcceleration;
     [SerializeField]
-    Collider collider;
+    Rigidbody rigid;
 
     // Start is called before the first frame update
     void Start()
@@ -34,6 +34,7 @@ public class EstimateKinematic : MonoBehaviour
         lastRotAcceleration = Vector3.zero;
         lastPosition = transform.position;
         lastRotation = transform.rotation;
+        rigid = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
