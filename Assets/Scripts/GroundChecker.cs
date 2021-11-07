@@ -25,37 +25,38 @@ public class GroundChecker : MonoBehaviour
     bool sphereHit2;
     [SerializeField]
     float raycastDist;
-    [SerializeField]
-    LayerMask mask;
+
+    List<float> footDists;
+    int[] spherecastResults;
+    int[] collisionResults;
+
+    //How close foot height can be to base height and still be considered on ground
+    public float footOnGroundMargin;
 
     private void Start()
     {
         spherecastRadius = transform.GetChild(0).localScale.x / 2.1f;
         spherecastRadiusVector = new Vector3(0, 0, spherecastRadius);
         calibrationData = GetComponent<Calibration>();
+        if(footOnGroundMargin == 0){
+            footOnGroundMargin = 0.05f;
+        }
+        footDists = new List<float>();
+        spherecastResults = new int[2] { 0, 0 };
+        collisionResults = new int[2] { 0, 0 };
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        //Debug.Log(gameObject.name + " colliding: " + colliding);
         FootOnGroundCheck();
         SpherecastCheck();
-        //Debug.Log(gameObject.name + " spherecast: " + spherecastGround);
+        if (colliding)
+            collisionResults[0]++;
+        else
+            collisionResults[1]++;
+
         grounded = !(footOnGround && !spherecastGround && !colliding);
     }
-
-    /*private void OnTriggerEnter(Collider other)
-    {
-        Debug.Log("trigger enter");
-        colliding = !other.gameObject.CompareTag("NoStand");
-        Debug.Log("colliding: " + colliding);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (!other.gameObject.CompareTag("NoStand"))
-            colliding = false;
-    }*/
 
     private void OnCollisionStay(Collision collision)
     {
@@ -65,7 +66,11 @@ public class GroundChecker : MonoBehaviour
     //Check to see if foot is physically on the ground in meatspace
     bool FootOnGroundCheck()
     {
-        bool a = Mathf.Abs(calibrationData.baseHeight - transform.root.InverseTransformPoint(transform.position).y) < 0.1f;
+        Debug.Log("baseheight: " + calibrationData.baseHeight + 
+        "\ncurrent height: " + transform.root.InverseTransformPoint(transform.position).y + 
+        "\nNon-transformed height: " + transform.position.y);
+        footDists.Add(Mathf.Abs(calibrationData.baseHeight - transform.root.InverseTransformPoint(transform.position).y));
+        bool a = Mathf.Abs(calibrationData.baseHeight - transform.root.InverseTransformPoint(transform.position).y) < footOnGroundMargin;
         footOnGround = a;
         return a;
     }
@@ -84,6 +89,37 @@ public class GroundChecker : MonoBehaviour
         Debug.DrawRay(origin, direction, Color.blue);
 
         spherecastGround = sphereHit1 || sphereHit2;
+
+        if (spherecastGround)
+            spherecastResults[0]++;
+         else
+            spherecastResults[1]++;
+
         return sphereHit1 || sphereHit2;
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log(name + " DATA");
+        float sum = 0;
+        foreach(float a in footDists){
+            sum += a;
+        }
+
+        float avgDist = sum / footDists.Count;
+        Debug.Log("AVG FOOT DISTANCE: " + avgDist);
+        Debug.Log("GREATEST DISTANCE: " + HighestValue(footDists));
+
+        Debug.Log("COLLISION TRUE: " + collisionResults[0] + " FALSE: " + collisionResults[1]);
+        Debug.Log("SPHERECAST TRUE: " + spherecastResults[0] + " FALSE: " + spherecastResults[1]);
+    }
+
+    private float HighestValue(List<float> values){
+        float highest = 0;
+        foreach(var value in values){
+            if (value > highest)
+                highest = value;
+        }
+        return highest;
     }
 }

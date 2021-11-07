@@ -26,11 +26,7 @@ public class PlayerControl : MonoBehaviour
     GameObject rightHand;
 
     bool walkButtonIsDown = false;
-    bool isGrounded = true;
-    bool isFootOnGround = true;
     public bool useGravity = false;
-    [SerializeField]
-    float raycastDist;
     List<bool> gravityBuffer;
     [SerializeField]
     int bufferSize;
@@ -62,15 +58,25 @@ public class PlayerControl : MonoBehaviour
                 break;
         }
 
+        spawnButton.AddOnChangeListener(SpawnButtonChange, controller);
         menuButton.AddOnStateDownListener(OpenMenu, controller);
-        leftFootCalibrationData = leftFoot.GetComponent<Calibration>();
-        leftFootGroundChecker = rightFoot.GetComponent<GroundChecker>();
-        rightFootCalibrationData = rightFoot.GetComponent<Calibration>();
-        rightFootGroundChecker = rightFoot.GetComponent<GroundChecker>();
+
+        if(leftFootCalibrationData == null)
+            leftFootCalibrationData = leftFoot.GetComponent<Calibration>();
+        if(leftFootGroundChecker)
+            leftFootGroundChecker = leftFoot.GetComponent<GroundChecker>();
+        if(rightFootCalibrationData)
+            rightFootCalibrationData = rightFoot.GetComponent<Calibration>();
+        if(rightFootGroundChecker)
+            rightFootGroundChecker = rightFoot.GetComponent<GroundChecker>();
+
         gravityBuffer = new List<bool>();
         for (int i = 0; i < bufferSize; i++)
         {
             gravityBuffer.Add(true);
+        }
+        foreach(bool g in gravityBuffer){
+            Debug.Log("g: " + g);
         }
     }
 
@@ -110,15 +116,16 @@ public class PlayerControl : MonoBehaviour
         if (useGravity)
         {
             gravityBuffer.RemoveAt(gravityBuffer.Count - 1);
-            if (!(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded))
-                Debug.LogWarning("right: " + rightFootGroundChecker.grounded + "\nleft: " + leftFootGroundChecker.grounded);
+            Debug.LogWarning("right: " + rightFootGroundChecker.grounded + 
+            "\nfootOnGround: " + rightFootGroundChecker.footOnGround + 
+            "\nspherecast: " + rightFootGroundChecker.spherecastGround + 
+            "\ncolliding: " + rightFootGroundChecker.colliding);
+            Debug.LogWarning("left: " + leftFootGroundChecker.grounded +
+            "\nfootOnGround: " + leftFootGroundChecker.footOnGround +
+            "\nspherecast: " + leftFootGroundChecker.spherecastGround +
+            "\ncolliding: " + leftFootGroundChecker.colliding);
 
             gravityBuffer.Insert(0, !(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded));
-            int i = 0;
-            foreach (bool b in gravityBuffer)
-            {
-                Debug.Log("buffer val " + i++ + ": " + b);
-            }
             bool a = gravityBuffer.TrueForAll(x => { return x; });
             Debug.Log("gravity should be: " + a);
             rigid.useGravity = a;

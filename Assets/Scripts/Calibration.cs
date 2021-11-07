@@ -10,6 +10,7 @@ public class Calibration : MonoBehaviour
     private float calibrateTime = 2.0f;
     public bool recordingHeight = false;
     [SerializeField] private Transform hmd;
+    Quaternion rotation;
 
     void Awake(){
         heightMeasurements = new List<float>();
@@ -20,7 +21,7 @@ public class Calibration : MonoBehaviour
 
     private void Start()
     {
-        baseHeight = transform.position.y;
+        baseHeight = transform.root.transform.InverseTransformPoint(transform.position).y;
     }
 
     public void Calibrate(){
@@ -30,24 +31,25 @@ public class Calibration : MonoBehaviour
 
     public void CalibrateHeight()
     {
+        baseHeight = 0;
         if (!recordingHeight) { 
             heightMeasurements = new List<float>();
             recordingHeight = true;
-            RecordHeight();
+            StartCoroutine("RecordHeight");
         }
     }
 
-    public void CalibrateOrientation(){
-        model.transform.rotation = Quaternion.LookRotation(hmd.forward, Vector3.up);
+    public void CalibrateOrientation() {
+        rotation = Quaternion.LookRotation(hmd.forward, Vector3.up);
     }
 
     public IEnumerator RecordHeight() {
         for (float timer = 0.0f; timer < calibrateTime; timer += 0.03f)
-        { 
+        {
             //Difference between tracker and floor height
-            heightMeasurements.Add(transform.position.y - transform.root.transform.position.y);
+            heightMeasurements.Add(transform.root.transform.InverseTransformPoint(transform.position).y);
 
-            yield return new WaitForFixedUpdate();
+            yield return new WaitForSecondsRealtime(0.03f);
         }
 
         float sum = 0;
@@ -57,6 +59,9 @@ public class Calibration : MonoBehaviour
         }
 
         baseHeight = sum / heightMeasurements.Count;
+        Debug.Log(name + " height diff: " + Vector3.up * -baseHeight);
+        transform.GetChild(0).position += Vector3.up *-baseHeight*0.05f;
+        model.transform.rotation = rotation;
         recordingHeight = false;
     }
 }
