@@ -6,8 +6,8 @@ public class Tripwire : MonoBehaviour
 {
     [SerializeField]
     AudioSource source;
-    void OnCollisionEnter(Collision collision){
-        if(collision.gameObject.CompareTag("Player")){
+    public void OnTriggerEnter(Collider collider){
+        if(collider.gameObject.CompareTag("Player")){
             source.Play();
         }
     }

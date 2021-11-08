@@ -10,6 +10,7 @@ public class DeactivateButton : MonoBehaviour
 
     public void OnCollisionEnter(Collision collision)
     {
+        Debug.LogError("Already Collided: " + alreadyCollided);
         if(!alreadyCollided && collision.collider.CompareTag("Player")){
             foreach(GameObject d in deactivate){
                 d.SetActive(false);

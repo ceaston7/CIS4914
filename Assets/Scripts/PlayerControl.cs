@@ -63,11 +63,11 @@ public class PlayerControl : MonoBehaviour
 
         if(leftFootCalibrationData == null)
             leftFootCalibrationData = leftFoot.GetComponent<Calibration>();
-        if(leftFootGroundChecker)
+        if(leftFootGroundChecker == null)
             leftFootGroundChecker = leftFoot.GetComponent<GroundChecker>();
-        if(rightFootCalibrationData)
+        if(rightFootCalibrationData == null)
             rightFootCalibrationData = rightFoot.GetComponent<Calibration>();
-        if(rightFootGroundChecker)
+        if(rightFootGroundChecker == null)
             rightFootGroundChecker = rightFoot.GetComponent<GroundChecker>();
 
         gravityBuffer = new List<bool>();
