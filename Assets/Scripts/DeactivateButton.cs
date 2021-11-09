@@ -8,10 +8,10 @@ public class DeactivateButton : MonoBehaviour
     List<GameObject> deactivate;
     bool alreadyCollided = false;
 
-    public void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider collider)
     {
         Debug.LogError("Already Collided: " + alreadyCollided);
-        if(!alreadyCollided && collision.collider.CompareTag("Player")){
+        if(!alreadyCollided && collider.CompareTag("Player")){
             foreach(GameObject d in deactivate){
                 d.SetActive(false);
             }
@@ -19,8 +19,9 @@ public class DeactivateButton : MonoBehaviour
         }
     }
 
-    public void OnCollisionExit(Collision collision){
-        if (collision.collider.CompareTag("Player"))
+    private void OnTriggerExit(Collider collider)
+    {
+        if (collider.CompareTag("Player"))
             alreadyCollided = false;
     }
 }

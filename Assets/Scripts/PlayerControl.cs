@@ -25,6 +25,9 @@ public class PlayerControl : MonoBehaviour
     [SerializeField]
     GameObject rightHand;
 
+    public float walkSpeed;
+    public float slideSpeed;
+
     bool walkButtonIsDown = false;
     public bool useGravity = false;
     List<bool> gravityBuffer;
@@ -83,7 +86,7 @@ public class PlayerControl : MonoBehaviour
         {
             if (walkButtonIsDown)
             {
-                walk();
+                Walk();
                 //update last foot positions after walk
                 lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
                 lastRightFootPos.Set(rightFoot.position.x, rightFoot.position.y, rightFoot.position.z);
@@ -126,12 +129,16 @@ public class PlayerControl : MonoBehaviour
     }
 
     //TODO: Walking backward?
-    private void walk()
+    private void Walk()
     {
         var camera2dForward = new Vector3(camera.forward.x, 0.0f, camera.forward.z);
         camera2dForward.Normalize();
         //TODO: See if a minimum movement is required to keep from slowly walking while standing still
         transform.position += camera2dForward * (Mathf.Abs(leftFoot.position.y - lastLeftFootPos.y) + Mathf.Abs(rightFoot.position.y - lastRightFootPos.y));
+    }
+
+    private void Slide(){
+
     }
 
     void WalkButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
