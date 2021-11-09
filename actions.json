@@ -41,6 +41,18 @@
       "requirement": "optional"
     },
     {
+      "name": "/actions/default/in/TouchpadDirection",
+      "type": "vector2"
+    },
+    {
+      "name": "/actions/default/in/TouchpadTouch",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/Menu",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },
@@ -72,6 +84,42 @@
       "name": "/actions/mixedreality/in/ExternalCamera",
       "type": "pose",
       "requirement": "optional"
+    },
+    {
+      "name": "/actions/mycontrols/in/GrabPinch",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/mycontrols/in/GrabGrip",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/mycontrols/in/TrackpadPress",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/mycontrols/in/TrackpadTouch",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/mycontrols/in/Menu",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/mycontrols/in/PressPinch",
+      "type": "vector1"
+    },
+    {
+      "name": "/actions/mycontrols/in/TrackpadDirection",
+      "type": "vector2"
+    },
+    {
+      "name": "/actions/mycontrols/in/InteractUI",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/mycontrols/out/Haptic",
+      "type": "vibration"
     }
   ],
   "action_sets": [
@@ -89,6 +137,10 @@
     },
     {
       "name": "/actions/mixedreality",
+      "usage": "single"
+    },
+    {
+      "name": "/actions/mycontrols",
       "usage": "single"
     }
   ],

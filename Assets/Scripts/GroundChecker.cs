@@ -65,10 +65,7 @@ public class GroundChecker : MonoBehaviour
 
     //Check to see if foot is physically on the ground in meatspace
     bool FootOnGroundCheck()
-    {
-        Debug.Log("baseheight: " + calibrationData.baseHeight + 
-        "\ncurrent height: " + transform.root.InverseTransformPoint(transform.position).y + 
-        "\nNon-transformed height: " + transform.position.y);
+    { 
         footDists.Add(Mathf.Abs(calibrationData.baseHeight - transform.root.InverseTransformPoint(transform.position).y));
         bool a = Mathf.Abs(calibrationData.baseHeight - transform.root.InverseTransformPoint(transform.position).y) < footOnGroundMargin;
         footOnGround = a;
@@ -100,18 +97,12 @@ public class GroundChecker : MonoBehaviour
 
     private void OnDestroy()
     {
-        Debug.Log(name + " DATA");
         float sum = 0;
         foreach(float a in footDists){
             sum += a;
         }
 
         float avgDist = sum / footDists.Count;
-        Debug.Log("AVG FOOT DISTANCE: " + avgDist);
-        Debug.Log("GREATEST DISTANCE: " + HighestValue(footDists));
-
-        Debug.Log("COLLISION TRUE: " + collisionResults[0] + " FALSE: " + collisionResults[1]);
-        Debug.Log("SPHERECAST TRUE: " + spherecastResults[0] + " FALSE: " + spherecastResults[1]);
     }
 
     private float HighestValue(List<float> values){

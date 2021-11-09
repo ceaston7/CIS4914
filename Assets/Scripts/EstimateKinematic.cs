@@ -67,7 +67,6 @@ public class EstimateKinematic : MonoBehaviour
                     //Actual force applied is the force in the direction of the collision normal (dot product) 
                     //divided by the number of contact points with the object
                     var linForce = (force * -Vector3.Dot(linAcceleration.normalized, contact.normal))/collision.contactCount;
-                    Debug.Log("LINFORCE: " + linForce);
                     collision.rigidbody.AddForceAtPosition(linForce, contact.point);
                 }
             }

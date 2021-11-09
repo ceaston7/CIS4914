@@ -75,9 +75,6 @@ public class PlayerControl : MonoBehaviour
         {
             gravityBuffer.Add(true);
         }
-        foreach(bool g in gravityBuffer){
-            Debug.Log("g: " + g);
-        }
     }
 
     void Update()
@@ -93,7 +90,6 @@ public class PlayerControl : MonoBehaviour
             }
 
             if(spawnButtonIsDown && spawnButtonChanged){
-                Debug.Log("Spawn cube");
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 
                 cube.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
@@ -116,18 +112,9 @@ public class PlayerControl : MonoBehaviour
         if (useGravity)
         {
             gravityBuffer.RemoveAt(gravityBuffer.Count - 1);
-            Debug.LogWarning("right: " + rightFootGroundChecker.grounded + 
-            "\nfootOnGround: " + rightFootGroundChecker.footOnGround + 
-            "\nspherecast: " + rightFootGroundChecker.spherecastGround + 
-            "\ncolliding: " + rightFootGroundChecker.colliding);
-            Debug.LogWarning("left: " + leftFootGroundChecker.grounded +
-            "\nfootOnGround: " + leftFootGroundChecker.footOnGround +
-            "\nspherecast: " + leftFootGroundChecker.spherecastGround +
-            "\ncolliding: " + leftFootGroundChecker.colliding);
 
             gravityBuffer.Insert(0, !(rightFootGroundChecker.grounded || leftFootGroundChecker.grounded));
             bool a = gravityBuffer.TrueForAll(x => { return x; });
-            Debug.Log("gravity should be: " + a);
             rigid.useGravity = a;
             if (!rigid.useGravity)
             {
@@ -149,10 +136,13 @@ public class PlayerControl : MonoBehaviour
 
     void WalkButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
         walkButtonIsDown = newState;
+        if(newState){
+            lastLeftFootPos = leftFoot.position;
+            lastRightFootPos = rightFoot.position;
+        }
     }
 
     void SpawnButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
-        Debug.Log("spawn button change");
         spawnButtonIsDown = newState;
         spawnButtonChanged = true;
         spawnSource = fromSource;
