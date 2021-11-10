@@ -43,6 +43,8 @@ public class PlayerControl : MonoBehaviour
     public SteamVR_Action_Boolean walkButton;
     public SteamVR_Action_Boolean menuButton;
     public SteamVR_Action_Boolean spawnButton;
+    public SteamVR_Action_Vector2 slideDirection;
+    public SteamVR_Action_Boolean slideButton;
     public SteamVR_Input_Sources controller;
 
     void Start()
@@ -54,6 +56,7 @@ public class PlayerControl : MonoBehaviour
             case Locomotion.blink:
                 break;
             case Locomotion.slide:
+                slideButton.AddOnChangeListener(SlideButtonChange, controller);
                 break;
             case Locomotion.walk:
                 //walking button
@@ -134,16 +137,20 @@ public class PlayerControl : MonoBehaviour
         var camera2dForward = new Vector3(camera.forward.x, 0.0f, camera.forward.z);
         camera2dForward.Normalize();
         //TODO: See if a minimum movement is required to keep from slowly walking while standing still
-        transform.position += camera2dForward * (Mathf.Abs(leftFoot.position.y - lastLeftFootPos.y) + Mathf.Abs(rightFoot.position.y - lastRightFootPos.y));
+        rigid.velocity += camera2dForward * (Mathf.Abs(leftFoot.position.y - lastLeftFootPos.y) + Mathf.Abs(rightFoot.position.y - lastRightFootPos.y));
     }
 
-    private void Slide(){
-
+    private void Slide()
+    {
+        Vector2 axisInput = slideDirection.GetAxis(controller);
+        Vector3 direction = new Vector3(axisInput.x, 0, axisInput.y);
+        direction = transform.TransformDirection(direction);
+        rigid.velocity += direction * slideSpeed;
     }
 
     void WalkButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
         walkButtonIsDown = newState;
-        if(newState){
+        if(newState && MyUserSettings.MyUserSettings.LocomotionMode == Locomotion.walk){
             lastLeftFootPos = leftFoot.position;
             lastRightFootPos = rightFoot.position;
         }
@@ -162,5 +169,9 @@ public class PlayerControl : MonoBehaviour
         pauseMenu.transform.position = camera.transform.position + camera.transform.forward * 3.0f;
         pauseMenu.transform.forward = camera.transform.forward;
         pauseMenu.GetComponent<MenuManager>().OpenMenu();
+    }
+
+    void SlideButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newstate){
+        
     }
 }
