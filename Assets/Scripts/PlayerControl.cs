@@ -6,6 +6,7 @@ using MyUserSettings;
 
 public class PlayerControl : MonoBehaviour
 {
+    bool firstPress = false;
     public Transform camera;
     Rigidbody rigid;
 
@@ -27,8 +28,10 @@ public class PlayerControl : MonoBehaviour
 
     public float walkSpeed;
     public float slideSpeed;
+    public float liftThreshold;
 
     bool walkButtonIsDown = false;
+    bool isSlideButtonDown = false;
     public bool useGravity = false;
     List<bool> gravityBuffer;
     [SerializeField]
@@ -90,9 +93,6 @@ public class PlayerControl : MonoBehaviour
             if (walkButtonIsDown)
             {
                 Walk();
-                //update last foot positions after walk
-                lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
-                lastRightFootPos.Set(rightFoot.position.x, rightFoot.position.y, rightFoot.position.z);
             }
 
             if(spawnButtonIsDown && spawnButtonChanged){
@@ -136,8 +136,20 @@ public class PlayerControl : MonoBehaviour
     {
         var camera2dForward = new Vector3(camera.forward.x, 0.0f, camera.forward.z);
         camera2dForward.Normalize();
-        //TODO: See if a minimum movement is required to keep from slowly walking while standing still
-        rigid.velocity += camera2dForward * (Mathf.Abs(leftFoot.position.y - lastLeftFootPos.y) + Mathf.Abs(rightFoot.position.y - lastRightFootPos.y));
+        if (firstPress) {
+            Debug.Log("lastLeft: " + lastLeftFootPos.y + "\ncurrent left: " + leftFoot.position.y);
+            Debug.Log("lastRight: " + lastRightFootPos.y + "\ncurrent right: " + rightFoot.position.y);
+        }
+
+        float leftDiff = Mathf.Abs(leftFoot.position.y - lastLeftFootPos.y);
+        float rightDiff = Mathf.Abs(rightFoot.position.y - lastRightFootPos.y);
+        if (leftDiff + rightDiff > liftThreshold)
+            transform.position += camera2dForward * (leftDiff + rightDiff) * walkSpeed;
+        
+        //update last foot positions after walk
+        lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
+        lastRightFootPos.Set(rightFoot.position.x, rightFoot.position.y, rightFoot.position.z);
+        firstPress = false;
     }
 
     private void Slide()
@@ -145,14 +157,15 @@ public class PlayerControl : MonoBehaviour
         Vector2 axisInput = slideDirection.GetAxis(controller);
         Vector3 direction = new Vector3(axisInput.x, 0, axisInput.y);
         direction = transform.TransformDirection(direction);
-        rigid.velocity += direction * slideSpeed;
+        transform.position += direction * slideSpeed;
     }
 
     void WalkButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState){
         walkButtonIsDown = newState;
-        if(newState && MyUserSettings.MyUserSettings.LocomotionMode == Locomotion.walk){
+        if(newState){
             lastLeftFootPos = leftFoot.position;
             lastRightFootPos = rightFoot.position;
+            firstPress = true;
         }
     }
 
@@ -172,6 +185,28 @@ public class PlayerControl : MonoBehaviour
     }
 
     void SlideButtonChange(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newstate){
-        
+        isSlideButtonDown = newstate;
+    }
+
+    public void ChangeMovementOption(int option)
+    {
+        if (option != (int)MyUserSettings.MyUserSettings.LocomotionMode)
+        {
+            switch ((Locomotion)option)
+            {
+                case Locomotion.walk:
+                    Debug.Log("Setting walk");
+                    walkButton.AddOnChangeListener(WalkButtonChange, controller);
+                    slideButton.RemoveOnChangeListener(SlideButtonChange, controller);
+                    break;
+                case Locomotion.slide:
+                    Debug.Log("Setting slide");
+                    slideButton.AddOnChangeListener(SlideButtonChange, controller);
+                    walkButton.RemoveOnChangeListener(WalkButtonChange, controller);
+                    break;
+            }
+
+            MyUserSettings.MyUserSettings.LocomotionMode = (Locomotion)option;
+        }
     }
 }

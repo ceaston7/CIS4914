@@ -20,7 +20,6 @@ public class AudioCollisionTrigger : MonoBehaviour
     {
         if (other.transform.CompareTag("Player"))
         {
-            Debug.Log("player step");
             if (!soundOverlap && !soundCutoff && !source.isPlaying)
             {
                 source.Play();
