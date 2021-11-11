@@ -30,7 +30,7 @@ public class CalibrationButton : MonoBehaviour
             targetImage.fillAmount = time / timer;
         }
         targetImage.fillAmount = 1.0f;
-        yield return new WaitForSecondsRealtime(1.0f);
+        yield return new WaitForSecondsRealtime(0.1f);
         targetImage.gameObject.SetActive(false);
         foreach (GameObject a in activate)
         {

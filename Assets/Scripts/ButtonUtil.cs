@@ -6,8 +6,9 @@ using UnityEngine.UI;
 public class ButtonUtil : MonoBehaviour
 {
     public Canvas targetMenu;
+    public Canvas superMenu;
     public void changeMenu()
     {
-        transform.root.GetComponent<MenuManager>().ChangeMenu(targetMenu);
+        superMenu.GetComponent<MenuManager>().ChangeMenu(targetMenu);
     }
 }

@@ -16,6 +16,15 @@ public class GroundChecker : MonoBehaviour
     //Grounded state based off of spherecast from VR feet
     public bool spherecastGround = false;
 
+    //The transform of the playspace object
+    public Transform playerRoot;
+
+    //Debugging stuff
+    public bool debugging;
+    List<float> footDists;
+    int[] spherecastResults;
+    int[] collisionResults;
+
     float spherecastRadius;
     Vector3 spherecastRadiusVector;
     Calibration calibrationData;
@@ -25,10 +34,6 @@ public class GroundChecker : MonoBehaviour
     bool sphereHit2;
     [SerializeField]
     float raycastDist;
-
-    List<float> footDists;
-    int[] spherecastResults;
-    int[] collisionResults;
 
     //How close foot height can be to base height and still be considered on ground
     public float footOnGroundMargin;
@@ -65,9 +70,10 @@ public class GroundChecker : MonoBehaviour
 
     //Check to see if foot is physically on the ground in meatspace
     bool FootOnGroundCheck()
-    { 
-        footDists.Add(Mathf.Abs(calibrationData.baseHeight - transform.root.InverseTransformPoint(transform.position).y));
-        bool a = Mathf.Abs(calibrationData.baseHeight - transform.root.InverseTransformPoint(transform.position).y) < footOnGroundMargin;
+    {
+        float footDist = Mathf.Abs(calibrationData.baseHeight - playerRoot.InverseTransformPoint(transform.position).y);
+        footDists.Add(footDist);
+        bool a = footDist < footOnGroundMargin;
         footOnGround = a;
         return a;
     }
@@ -97,12 +103,20 @@ public class GroundChecker : MonoBehaviour
 
     private void OnDestroy()
     {
-        float sum = 0;
-        foreach(float a in footDists){
-            sum += a;
-        }
+        if (debugging)
+        {
+            float sum = 0;
+            foreach (float a in footDists)
+            {
+                sum += a;
+            }
 
-        float avgDist = sum / footDists.Count;
+            float avgDist = sum / footDists.Count;
+
+            Debug.Log(name + "\navgFoG dist: " + avgDist + 
+                        "\nSpherecasts true: " + spherecastResults[0] + ", false: " + spherecastResults[1] +
+                        "\nCollisions true: " + collisionResults[0] + ", false: " + collisionResults[1]);
+        }
     }
 
     private float HighestValue(List<float> values){
