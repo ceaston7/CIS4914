@@ -10,6 +10,7 @@ public class Calibration : MonoBehaviour
     private float calibrateTime = 2.0f;
     public bool recordingHeight = false;
     [SerializeField] private Transform hmd;
+    [SerializeField] private Transform playerRoot;
     Quaternion rotation;
 
     void Awake(){
@@ -21,7 +22,7 @@ public class Calibration : MonoBehaviour
 
     private void Start()
     {
-        baseHeight = transform.root.transform.InverseTransformPoint(transform.position).y;
+        baseHeight = playerRoot.InverseTransformPoint(transform.position).y;
     }
 
     public void Calibrate(){
@@ -47,7 +48,7 @@ public class Calibration : MonoBehaviour
         for (float timer = 0.0f; timer < calibrateTime; timer += 0.03f)
         {
             //Difference between tracker and floor height
-            heightMeasurements.Add(transform.root.transform.InverseTransformPoint(transform.position).y);
+            heightMeasurements.Add(playerRoot.InverseTransformPoint(transform.position).y);
 
             yield return new WaitForSecondsRealtime(0.03f);
         }

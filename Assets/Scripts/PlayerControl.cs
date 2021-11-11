@@ -5,8 +5,12 @@ using Valve.VR;
 using MyUserSettings;
 
 public class PlayerControl : MonoBehaviour
-{
+{   
+    //For debugging, delete
     bool firstPress = false;
+    List<float> leftHeights = new List<float>();
+    List<float> rightHeights = new List<float>();
+
     public Transform camera;
     Rigidbody rigid;
 
@@ -136,13 +140,17 @@ public class PlayerControl : MonoBehaviour
     {
         var camera2dForward = new Vector3(camera.forward.x, 0.0f, camera.forward.z);
         camera2dForward.Normalize();
-        if (firstPress) {
-            Debug.Log("lastLeft: " + lastLeftFootPos.y + "\ncurrent left: " + leftFoot.position.y);
-            Debug.Log("lastRight: " + lastRightFootPos.y + "\ncurrent right: " + rightFoot.position.y);
-        }
-
+        
         float leftDiff = Mathf.Abs(leftFoot.position.y - lastLeftFootPos.y);
         float rightDiff = Mathf.Abs(rightFoot.position.y - lastRightFootPos.y);
+        if (firstPress) {
+            Debug.Log("leftDiff: " + leftDiff + "\nlastLeft: " + lastLeftFootPos.y + "\ncurrent left: " + leftFoot.position.y);
+            Debug.Log("rightDiff: " + rightDiff + "\nlastRight: " + lastRightFootPos.y + "\ncurrent right: " + rightFoot.position.y);
+        }
+
+        rightHeights.Add(rightDiff);
+        leftHeights.Add(leftDiff);
+
         if (leftDiff + rightDiff > liftThreshold)
             transform.position += camera2dForward * (leftDiff + rightDiff) * walkSpeed;
         
@@ -208,5 +216,70 @@ public class PlayerControl : MonoBehaviour
 
             MyUserSettings.MyUserSettings.LocomotionMode = (Locomotion)option;
         }
+    }
+
+    void OnDestroy(){
+        float rightAvg = 0f;
+        float leftAvg = 0f;
+        float rightMode = 0f;
+        int rightModeCount = 0;
+        float leftMode = 0f;
+        int leftModeCount = 0;
+
+        List<Vector2> leftCounter = new List<Vector2>();
+        List<Vector2> rightCounter = new List<Vector2>();
+
+        for(int i = 0; i < rightHeights.Count; i++){
+            rightHeights[i] = Mathf.Round(rightHeights[i] * 100f) / 100f;
+            leftHeights[i] = Mathf.Round(leftHeights[i] * 100f) / 100f;
+        }
+
+        int index = -1;
+
+        foreach(var r in rightHeights){
+            rightAvg += r;
+            index = rightCounter.FindIndex(x => { return x.x == r; });
+            if(index != -1){
+                var a = rightCounter[index];
+                a.y++;
+                rightCounter[index] = a;
+            }
+            index = -1;
+        }
+
+        foreach (var l in leftHeights)
+        {
+            leftAvg += l;
+            index = leftCounter.FindIndex(x => { return x.x == l; });
+            if (index != -1)
+            {
+                var a = leftCounter[index];
+                a.y++;
+                leftCounter[index] = a;
+            }
+            index = -1;
+        }
+
+        foreach(var v in rightCounter){
+            if (rightModeCount < v.y) {
+                rightMode = v.x;
+                rightModeCount = (int)v.y;
+            }
+        }
+
+        foreach (var v in leftCounter)
+        {
+            if (leftModeCount < v.y)
+            {
+                leftMode = v.x;
+                leftModeCount = (int)v.y;
+            }
+        }
+
+        rightAvg = rightAvg / rightHeights.Count;
+        leftAvg = leftAvg / leftHeights.Count;
+
+        Debug.Log("Leftavgdiff: " + leftAvg + "\nleft mode: " + leftMode + ", with: " + leftModeCount);
+        Debug.Log("Rightavgdiff: " + rightAvg + "\nright mode: " + rightMode + ", with: " + rightModeCount);
     }
 }
