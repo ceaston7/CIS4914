@@ -161,9 +161,10 @@ public class PlayerControl : MonoBehaviour
     //TODO: Walking backward?
     private void Walk()
     {
+        
         Vector3 walkVector = new Vector3();
         //Walk in the average direction feet are pointing
-        var walkDirection = leftFoot.forward + rightFoot.forward;
+        var walkDirection = leftFoot.GetChild(0).forward + rightFoot.GetChild(0).forward;
         walkDirection.y = 0f;
         walkDirection.Normalize();
 
@@ -173,9 +174,11 @@ public class PlayerControl : MonoBehaviour
         rightHeights.Add(rightDiff);
         leftHeights.Add(leftDiff);
 
-        //if (leftDiff + rightDiff > liftThreshold)
-        walkVector = walkDirection * (leftDiff + rightDiff) * walkSpeed;
-        transform.position += walkVector;
+        if (!firstPress) { 
+            //if (leftDiff + rightDiff > liftThreshold)
+            walkVector = walkDirection * (leftDiff + rightDiff) * walkSpeed;
+            transform.position += walkVector;
+        }
 
         //update last foot positions after walk
         lastLeftFootPos.Set(leftFoot.position.x, leftFoot.position.y, leftFoot.position.z);
